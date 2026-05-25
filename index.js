@@ -29,6 +29,11 @@ async function run() {
         const myTutorsCollection = db.collection("myTutors");
 
 
+        app.get('/feat-tutors', async (req, res) => {
+            const result = await tutorCollection.find().limit(6).toArray();
+            res.send(result);
+        });
+        
         app.get('/tutors', async (req, res) => {
             const result = await tutorCollection.find().toArray();
             res.send(result);
