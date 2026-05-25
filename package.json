@@ -2,14 +2,22 @@
   "name": "mediqueue-server",
   "version": "1.0.0",
   "description": "",
+  "keywords": [],
+  "homepage": "https://github.com/chandan-d-karmaker/mediqueue-server#readme",
+  "bugs": {
+    "url": "https://github.com/chandan-d-karmaker/mediqueue-server/issues"
+  },
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/chandan-d-karmaker/mediqueue-server.git"
+  },
+  "license": "ISC",
+  "author": "chandan",
+  "type": "commonjs",
   "main": "index.js",
   "scripts": {
     "test": "echo \"Error: no test specified\" && exit 1"
   },
-  "keywords": [],
-  "author": "chandan",
-  "license": "ISC",
-  "type": "commonjs",
   "dependencies": {
     "cors": "^2.8.6",
     "dotenv": "^17.4.2",

@@ -6,7 +6,10 @@ const cors = require('cors');
 dotenv.config();
 
 app.use(express.json());
-app.use(cors());
+app.use(cors({
+    origin: [process.env.FRONTEND_URL], // Allow your frontend
+    credentials: true
+}));
 app.use(express.json());
 
 const { MongoClient, ServerApiVersion, ObjectId } = require('mongodb');
@@ -33,7 +36,7 @@ async function run() {
             const result = await tutorCollection.find().limit(6).toArray();
             res.send(result);
         });
-        
+
         app.get('/all-tutors', async (req, res) => {
             const result = await tutorCollection.find().toArray();
             res.send(result);
@@ -52,10 +55,12 @@ async function run() {
             res.send(result);
         });
 
-        app.patch('/my-tutors/:id', async (req, res) => {
+        app.patch('/all-tutors/:id', async (req, res) => {
             const id = req.params.id;
+            const { remainingSlots } = req.body;
+            console.log(req.body);
             const filter = { _id: new ObjectId(id) };
-            const update = { $set: req.body };
+            const update = { $set: { remainingSlots: remainingSlots } };
             const result = await myTutorsCollection.updateOne(filter, update);
             res.send(result);
         });
@@ -67,23 +72,23 @@ async function run() {
             res.send(result);
         });
 
-            // Connect the client to the server	(optional starting in v4.7)
-            await client.connect();
-            // Send a ping to confirm a successful connection
-            await client.db("admin").command({ ping: 1 });
-            console.log("Pinged your deployment. You successfully connected to MongoDB!");
-        } finally {
-            // Ensures that the client will close when you finish/error
-            // await client.close();
-        }
+        // Connect the client to the server	(optional starting in v4.7)
+        await client.connect();
+        // Send a ping to confirm a successful connection
+        await client.db("admin").command({ ping: 1 });
+        console.log("Pinged your deployment. You successfully connected to MongoDB!");
+    } finally {
+        // Ensures that the client will close when you finish/error
+        // await client.close();
     }
+}
 run().catch(console.dir);
 
-    app.get('/', (req, res) => {
+app.get('/', (req, res) => {
 
-        res.send('Hello from server');
-        console.log('server is running, try a endpoint!')
+    res.send('Hello from server');
+    console.log('server is running, try a endpoint!')
 
-    });
+});
 
-    app.listen(PORT, () => console.log(`Server running on port ${PORT}`));
+app.listen(PORT, () => console.log(`Server running on port ${PORT}`));
