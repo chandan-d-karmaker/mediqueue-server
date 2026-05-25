@@ -9,7 +9,7 @@ app.use(express.json());
 app.use(cors());
 app.use(express.json());
 
-const { MongoClient, ServerApiVersion } = require('mongodb');
+const { MongoClient, ServerApiVersion, ObjectId } = require('mongodb');
 const uri = process.env.MONGO_URI;
 const PORT = process.env.PORT;
 
@@ -26,7 +26,7 @@ async function run() {
 
         const db = client.db("mediqueue-db");
         const tutorCollection = db.collection("tutors");
-        const myTutorsCollection = db.collection("myTutors");
+        const myTutorsCollection = db.collection("my-tutors");
 
 
         app.get('/feat-tutors', async (req, res) => {
@@ -34,11 +34,38 @@ async function run() {
             res.send(result);
         });
         
-        app.get('/tutors', async (req, res) => {
+        app.get('/all-tutors', async (req, res) => {
             const result = await tutorCollection.find().toArray();
             res.send(result);
         });
 
+        app.get('/all-tutors/:id', async (req, res) => {
+            const id = req.params.id;
+            const query = { _id: new ObjectId(id) };
+            const result = await tutorCollection.findOne(query);
+            res.send(result);
+        });
+
+        app.post('/my-tutors', async (req, res) => {
+            const tutor = req.body;
+            const result = await myTutorsCollection.insertOne(tutor);
+            res.send(result);
+        });
+
+        app.patch('/my-tutors/:id', async (req, res) => {
+            const id = req.params.id;
+            const filter = { _id: new ObjectId(id) };
+            const update = { $set: req.body };
+            const result = await myTutorsCollection.updateOne(filter, update);
+            res.send(result);
+        });
+
+        app.delete('/my-tutors/:id', async (req, res) => {
+            const id = req.params.id;
+            const filter = { _id: new ObjectId(id) };
+            const result = await myTutorsCollection.deleteOne(filter);
+            res.send(result);
+        });
 
             // Connect the client to the server	(optional starting in v4.7)
             await client.connect();
