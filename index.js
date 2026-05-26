@@ -55,13 +55,33 @@ async function run() {
             res.send(result);
         });
 
+        app.get('/my-tutors', async (req, res) => {
+            const result = await myTutorsCollection.find().toArray();
+            res.send(result);
+        });
+
         app.patch('/all-tutors/:id', async (req, res) => {
             const id = req.params.id;
-            const { remainingSlots } = req.body;
-            console.log(req.body);
-            const filter = { _id: new ObjectId(id) };
-            const update = { $set: { remainingSlots: remainingSlots } };
-            const result = await myTutorsCollection.updateOne(filter, update);
+            const update = req.body;
+            // console.log(req.body);
+            const tutor = await tutorCollection.findOne({ _id: new ObjectId(id) });
+            console.log(tutor);
+
+            if (!tutor) {
+                return res.status(404).send({ message: 'Tutor not found' });
+            }
+
+            if (tutor.remainingSlots <= 0) {
+                return res.status(400).send({ message: 'No slots remaining' });
+            }
+
+            await tutorCollection.updateOne(
+                { _id: new ObjectId(id) },
+                { $inc: { remainingSlots: -1 } }
+            );
+
+            const result = await myTutorsCollection.insertOne({ ...update });
+
             res.send(result);
         });
 
