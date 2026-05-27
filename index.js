@@ -30,6 +30,7 @@ async function run() {
         const db = client.db("mediqueue-db");
         const tutorCollection = db.collection("tutors");
         const myTutorsCollection = db.collection("my-tutors");
+        const myBookingCollection = db.collection("my-bookings");
 
 
         app.get('/feat-tutors', async (req, res) => {
@@ -49,12 +50,19 @@ async function run() {
             res.send(result);
         });
 
-        app.post('/my-tutors', async (req, res) => {
+        app.post('/all-tutors', async (req, res) => {
             const tutor = req.body;
-            const result = await myTutorsCollection.insertOne(tutor);
+            const result = await tutorCollection.insertOne(tutor);
             res.send(result);
         });
 
+        // app.post('/my-bookings', async (req, res) => {
+        //     const tutor = req.body;
+        //     const result = await myBookingCollection.insertOne(tutor);
+        //     res.send(result);
+        // });
+
+        // filter with userId to get booked tutors for a user
         app.get('/my-tutors', async (req, res) => {
             const result = await myTutorsCollection.find().toArray();
             res.send(result);
@@ -80,10 +88,17 @@ async function run() {
                 { $inc: { remainingSlots: -1 } }
             );
 
-            const result = await myTutorsCollection.insertOne({ ...update });
+            const result = await myBookingCollection.insertOne(update);
 
             res.send(result);
         });
+
+        app.post('/all-tutors', async(req, res)=>{
+            const tutorData = req.body;
+            tutorData.remainingSlots = parseInt(tutorData.remainingSlots, 10);
+            const result = await tutorCollection.insertOne(tutorData);
+            res.send(result);
+        })
 
         app.delete('/my-tutors/:id', async (req, res) => {
             const id = req.params.id;
