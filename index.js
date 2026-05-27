@@ -50,23 +50,17 @@ async function run() {
             res.send(result);
         });
 
-        app.post('/all-tutors', async (req, res) => {
-            const tutor = req.body;
-            const result = await tutorCollection.insertOne(tutor);
-            res.send(result);
-        });
+        // get tutors added by me
+    //    app.get('/my-tutors/:id', async(req, res)=>{
+    //         const id = req.params.id;
+    //         const result = await tutorCollection.find({ userId})
+    //    });
 
-        // app.post('/my-bookings', async (req, res) => {
-        //     const tutor = req.body;
-        //     const result = await myBookingCollection.insertOne(tutor);
+        // filter with userId to get added tutors for a user
+        // app.get('/my-tutors', async (req, res) => {
+        //     const result = await myTutorsCollection.find().toArray();
         //     res.send(result);
         // });
-
-        // filter with userId to get booked tutors for a user
-        app.get('/my-tutors', async (req, res) => {
-            const result = await myTutorsCollection.find().toArray();
-            res.send(result);
-        });
 
         app.patch('/all-tutors/:id', async (req, res) => {
             const id = req.params.id;
@@ -95,10 +89,13 @@ async function run() {
 
         app.post('/all-tutors', async(req, res)=>{
             const tutorData = req.body;
+            console.log(tutorData);
             tutorData.remainingSlots = parseInt(tutorData.remainingSlots, 10);
             const result = await tutorCollection.insertOne(tutorData);
-            res.send(result);
+            res.json(result);
         })
+
+
 
         app.delete('/my-tutors/:id', async (req, res) => {
             const id = req.params.id;
