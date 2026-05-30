@@ -58,6 +58,13 @@ async function run() {
             res.send(result);
         });
 
+         // get tutors booked by me
+        app.get('/my-bookings/:userId', async (req, res) => {
+            const userId = req.params.userId;
+            const result = await myBookingCollection.find({userId: userId}).toArray();
+            res.send(result);
+        });
+
         app.patch('/all-tutors/:id', async (req, res) => {
             const id = req.params.id;
             const update = req.body;
@@ -104,12 +111,18 @@ async function run() {
             res.json(result);
         })
 
-
-
         app.delete('/my-tutors/:id', async (req, res) => {
             const id = req.params.id;
             const filter = { _id: new ObjectId(id) };
-            const result = await myTutorsCollection.deleteOne(filter);
+            const result = await tutorCollection.deleteOne(filter);
+            res.json(result);
+        });
+
+        app.patch('/my-bookings/:id', async (req, res) => {
+            const id = req.params.id;
+            const filter = { _id: new ObjectId(id) };
+            const update = { $set: { status: 'cancelled' } };
+            const result = await myBookingCollection.updateOne(filter, update);
             res.send(result);
         });
 
