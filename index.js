@@ -83,6 +83,19 @@ async function run() {
             res.send(result);
         });
 
+        // for updating added tutor data by user
+        app.patch('/my-tutors/:id', async (req, res) => {
+            const id = req.params.id;
+            const updatedData = req.body;
+            console.log(updatedData);
+
+            const result = await tutorCollection.updateOne(
+                { _id: new ObjectId(id) },
+                { $set: updatedData } );
+
+            res.send(result);
+        });
+
         app.post('/all-tutors', async (req, res) => {
             const tutorData = req.body;
             console.log(tutorData);
