@@ -50,17 +50,13 @@ async function run() {
             res.send(result);
         });
 
-        // get tutors added by me
-    //    app.get('/my-tutors/:id', async(req, res)=>{
-    //         const id = req.params.id;
-    //         const result = await tutorCollection.find({ userId})
-    //    });
 
-        // filter with userId to get added tutors for a user
-        // app.get('/my-tutors', async (req, res) => {
-        //     const result = await myTutorsCollection.find().toArray();
-        //     res.send(result);
-        // });
+        // get tutors added by me
+        app.get('/my-tutors/:userId', async (req, res) => {
+            const userId = req.params.userId;
+            const result = await tutorCollection.find({userID: userId}).toArray();
+            res.send(result);
+        });
 
         app.patch('/all-tutors/:id', async (req, res) => {
             const id = req.params.id;
@@ -87,7 +83,7 @@ async function run() {
             res.send(result);
         });
 
-        app.post('/all-tutors', async(req, res)=>{
+        app.post('/all-tutors', async (req, res) => {
             const tutorData = req.body;
             console.log(tutorData);
             tutorData.remainingSlots = parseInt(tutorData.remainingSlots, 10);
