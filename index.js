@@ -134,7 +134,7 @@ async function run() {
         app.patch('/my-bookings/:id', async (req, res) => {
             const id = req.params.id;
             const filter = { _id: new ObjectId(id) };
-            const update = { $set: { status: 'cancelled' } };
+            const update = { $set: { status: 'Cancelled' } };
             const result = await myBookingCollection.updateOne(filter, update);
             res.send(result);
         });
