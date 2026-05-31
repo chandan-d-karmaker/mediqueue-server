@@ -54,14 +54,14 @@ async function run() {
         // get tutors added by me
         app.get('/my-tutors/:userId', async (req, res) => {
             const userId = req.params.userId;
-            const result = await tutorCollection.find({userID: userId}).toArray();
+            const result = await tutorCollection.find({ userID: userId }).toArray();
             res.send(result);
         });
 
-         // get tutors booked by me
+        // get tutors booked by me
         app.get('/my-bookings/:userId', async (req, res) => {
             const userId = req.params.userId;
-            const result = await myBookingCollection.find({userId: userId}).toArray();
+            const result = await myBookingCollection.find({ userId: userId }).toArray();
             res.send(result);
         });
 
@@ -76,8 +76,21 @@ async function run() {
                 return res.status(404).send({ message: 'Tutor not found' });
             }
 
+            const date1 = new Date(tutor.sessionStartDate);
+            const date2 = new Date();
+
+            if (date2 < date1) {
+                return res.status(400).send({
+                    message: 'Booking is not available yet for this tutor',
+                    errorCode: 'BOOKING_NOT_AVAILABLE_YET'
+                });
+            }
+
             if (tutor.remainingSlots <= 0) {
-                return res.status(400).send({ message: 'No slots remaining' });
+                return res.status(400).send({
+                    message: 'No available slots left',
+                    errorCode: 'NO_SLOTS_AVAILABLE'
+                });
             }
 
             await tutorCollection.updateOne(
@@ -98,7 +111,7 @@ async function run() {
 
             const result = await tutorCollection.updateOne(
                 { _id: new ObjectId(id) },
-                { $set: updatedData } );
+                { $set: updatedData });
 
             res.send(result);
         });
