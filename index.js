@@ -88,7 +88,7 @@ async function run() {
 
             if (tutor.remainingSlots <= 0) {
                 return res.status(400).send({
-                    message: 'No available slots left',
+                    message: 'This session is fully booked. You can not join at this moment.',
                     errorCode: 'NO_SLOTS_AVAILABLE'
                 });
             }
