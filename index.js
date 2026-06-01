@@ -24,11 +24,11 @@ const client = new MongoClient(uri, {
 });
 
 const JWKS = createRemoteJWKSet(
-  new URL(`${process.env.FRONTEND_URL}/api/auth/jwks`)
-//   http://localhost:3000/api/auth/jwks
+    new URL(`${process.env.FRONTEND_URL}/api/auth/jwks`)
+    //   http://localhost:3000/api/auth/jwks
 )
 
-const verifyToken = async(req, res, next) => {
+const verifyToken = async (req, res, next) => {
 
     const authHeader = req?.headers?.authorization;
 
@@ -37,7 +37,7 @@ const verifyToken = async(req, res, next) => {
     }
     const token = authHeader.split(" ")[1]
     if (!token) {
-        return res.status(401).json({ message: 'token unauthorized' })
+        return res.status(401).json({ message: 'unauthorized' })
     }
     // console.log(token);
 
@@ -166,7 +166,11 @@ async function run() {
         app.patch('/my-bookings/:id', verifyToken, async (req, res) => {
             const id = req.params.id;
             const filter = { _id: new ObjectId(id) };
-            const update = { $set: { status: 'Cancelled' } };
+            const update = { $set: { status: "Cancelled" } };
+                // toggle status between "Booked" and "Cancelled" will be implemented in future update
+                // $set: {
+                //     status: { $not: "$status" }
+                // }
             const result = await myBookingCollection.updateOne(filter, update);
             res.send(result);
         });
