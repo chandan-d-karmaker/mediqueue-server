@@ -6,13 +6,11 @@ const cors = require('cors');
 dotenv.config();
 
 app.use(express.json());
-app.use(cors({
-    origin: [process.env.FRONTEND_URL], // Allow your frontend
-    credentials: true
-}));
+app.use(cors());
 app.use(express.json());
 
 const { MongoClient, ServerApiVersion, ObjectId } = require('mongodb');
+const { createRemoteJWKSet, jwtVerify } = require('jose-cjs');
 const uri = process.env.MONGO_URI;
 const PORT = process.env.PORT;
 
@@ -24,26 +22,56 @@ const client = new MongoClient(uri, {
         deprecationErrors: true,
     }
 });
+
+const JWKS = createRemoteJWKSet(
+  new URL(`${process.env.FRONTEND_URL}/api/auth/jwks`)
+//   http://localhost:3000/api/auth/jwks
+)
+
+const verifyToken = async(req, res, next) => {
+
+    const authHeader = req?.headers?.authorization;
+
+    if (!authHeader) {
+        return res.status(401).json({ message: 'unauthorized' })
+    }
+    const token = authHeader.split(" ")[1]
+    if (!token) {
+        return res.status(401).json({ message: 'token unauthorized' })
+    }
+    // console.log(token);
+
+    try {
+        const { payload } = await jwtVerify(token, JWKS)
+        // console.log(payload);
+        next()
+    } catch (error) {
+        return res.status(403).json({ message: "Forbidden" })
+    }
+
+}
 async function run() {
     try {
 
         const db = client.db("mediqueue-db");
         const tutorCollection = db.collection("tutors");
-        const myTutorsCollection = db.collection("my-tutors");
+        // const myTutorsCollection = db.collection("my-tutors");
         const myBookingCollection = db.collection("my-bookings");
 
-
+        // GET featured tutors data (HOME PAGE)
         app.get('/feat-tutors', async (req, res) => {
             const result = await tutorCollection.find().limit(6).toArray();
             res.send(result);
         });
 
+        // GET all tutors data (TUTORS PAGE)
         app.get('/all-tutors', async (req, res) => {
             const result = await tutorCollection.find().toArray();
             res.send(result);
         });
 
-        app.get('/all-tutors/:id', async (req, res) => {
+        // GET single tutor data by id (TUTOR DETAILS PAGE)
+        app.get('/all-tutors/:id', verifyToken, async (req, res) => {
             const id = req.params.id;
             const query = { _id: new ObjectId(id) };
             const result = await tutorCollection.findOne(query);
@@ -51,7 +79,7 @@ async function run() {
         });
 
 
-        // get tutors added by me
+        // get tutors added by a user
         app.get('/my-tutors/:userId', async (req, res) => {
             const userId = req.params.userId;
             const result = await tutorCollection.find({ userID: userId }).toArray();
@@ -65,6 +93,7 @@ async function run() {
             res.send(result);
         });
 
+        // for booking a tutor session by user
         app.patch('/all-tutors/:id', async (req, res) => {
             const id = req.params.id;
             const update = req.body;
@@ -116,6 +145,7 @@ async function run() {
             res.send(result);
         });
 
+        // for adding a tutor by user
         app.post('/all-tutors', async (req, res) => {
             const tutorData = req.body;
             console.log(tutorData);
@@ -124,6 +154,7 @@ async function run() {
             res.json(result);
         })
 
+        // for deleting a tutor added by user
         app.delete('/my-tutors/:id', async (req, res) => {
             const id = req.params.id;
             const filter = { _id: new ObjectId(id) };
@@ -131,6 +162,7 @@ async function run() {
             res.json(result);
         });
 
+        // for updating the status of booking session by user
         app.patch('/my-bookings/:id', async (req, res) => {
             const id = req.params.id;
             const filter = { _id: new ObjectId(id) };
