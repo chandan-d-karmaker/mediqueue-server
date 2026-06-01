@@ -80,21 +80,21 @@ async function run() {
 
 
         // get tutors added by a user
-        app.get('/my-tutors/:userId', async (req, res) => {
+        app.get('/my-tutors/:userId', verifyToken, async (req, res) => {
             const userId = req.params.userId;
             const result = await tutorCollection.find({ userID: userId }).toArray();
             res.send(result);
         });
 
         // get tutors booked by me
-        app.get('/my-bookings/:userId', async (req, res) => {
+        app.get('/my-bookings/:userId', verifyToken, async (req, res) => {
             const userId = req.params.userId;
             const result = await myBookingCollection.find({ userId: userId }).toArray();
             res.send(result);
         });
 
         // for booking a tutor session by user
-        app.patch('/all-tutors/:id', async (req, res) => {
+        app.patch('/all-tutors/:id', verifyToken, async (req, res) => {
             const id = req.params.id;
             const update = req.body;
             // console.log(req.body);
@@ -133,7 +133,7 @@ async function run() {
         });
 
         // for updating added tutor data by user
-        app.patch('/my-tutors/:id', async (req, res) => {
+        app.patch('/my-tutors/:id', verifyToken, async (req, res) => {
             const id = req.params.id;
             const updatedData = req.body;
             console.log(updatedData);
@@ -146,7 +146,7 @@ async function run() {
         });
 
         // for adding a tutor by user
-        app.post('/all-tutors', async (req, res) => {
+        app.post('/all-tutors', verifyToken, async (req, res) => {
             const tutorData = req.body;
             console.log(tutorData);
             tutorData.remainingSlots = parseInt(tutorData.remainingSlots, 10);
@@ -155,7 +155,7 @@ async function run() {
         })
 
         // for deleting a tutor added by user
-        app.delete('/my-tutors/:id', async (req, res) => {
+        app.delete('/my-tutors/:id', verifyToken, async (req, res) => {
             const id = req.params.id;
             const filter = { _id: new ObjectId(id) };
             const result = await tutorCollection.deleteOne(filter);
@@ -163,7 +163,7 @@ async function run() {
         });
 
         // for updating the status of booking session by user
-        app.patch('/my-bookings/:id', async (req, res) => {
+        app.patch('/my-bookings/:id', verifyToken, async (req, res) => {
             const id = req.params.id;
             const filter = { _id: new ObjectId(id) };
             const update = { $set: { status: 'Cancelled' } };
