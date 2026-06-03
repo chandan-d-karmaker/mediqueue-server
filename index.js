@@ -66,15 +66,40 @@ async function run() {
 
         // GET all tutors data (TUTORS PAGE) with optional name search
         app.get('/all-tutors', async (req, res) => {
-            const searchTerm = req.query.search;
-            console.log(searchTerm);
-            const query = searchTerm
-                ? {
-                    name: { $regex: searchTerm, $options: 'i' }
-                }
-                : {};
+            // const searchTerm = req.query.search;
+            const { search, startDate, endDate } = req.query;
+            console.log(search, startDate, endDate);
+            // let result;
+            let query = {};
+            if (search) {
+                query.name = {
+                    $regex: search,
+                    $options: 'i'
+                };
+            }
+
+            if (startDate && startDate.trim() !== "") {
+                // Tutors who starton or after this date
+                query.sessionStartDate = { ...query.sessionStartDate, $gte: startDate };
+            }
+
+            if (endDate && endDate.trim() !== "") {
+                // Tutors who start on or before this date
+                query.sessionStartDate = { ...query.sessionStartDate, $lte: endDate };
+            }
+            // console.log("MongoDB Query:", JSON.stringify(query));
+            console.log("Full Query Object being sent to MongoDB:", JSON.stringify(query, null, 2));
             const result = await tutorCollection.find(query).toArray();
             res.send(result);
+
+            // const query = searchTerm
+            //     ? {
+            //         name: { $regex: searchTerm, $options: 'i' }
+            //     }
+            //     : {};
+
+            // result = await tutorCollection.find().toArray();
+            // res.send(result);
         });
 
         // GET single tutor data by id (TUTOR DETAILS PAGE)
