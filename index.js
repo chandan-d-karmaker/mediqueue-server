@@ -64,9 +64,16 @@ async function run() {
             res.send(result);
         });
 
-        // GET all tutors data (TUTORS PAGE)
+        // GET all tutors data (TUTORS PAGE) with optional name search
         app.get('/all-tutors', async (req, res) => {
-            const result = await tutorCollection.find().toArray();
+            const searchTerm = req.query.search;
+            console.log(searchTerm);
+            const query = searchTerm
+                ? {
+                    name: { $regex: searchTerm, $options: 'i' }
+                }
+                : {};
+            const result = await tutorCollection.find(query).toArray();
             res.send(result);
         });
 
@@ -167,10 +174,10 @@ async function run() {
             const id = req.params.id;
             const filter = { _id: new ObjectId(id) };
             const update = { $set: { status: "Cancelled" } };
-                // toggle status between "Booked" and "Cancelled" will be implemented in future update
-                // $set: {
-                //     status: { $not: "$status" }
-                // }
+            // toggle status between "Booked" and "Cancelled" will be implemented in future update
+            // $set: {
+            //     status: { $not: "$status" }
+            // }
             const result = await myBookingCollection.updateOne(filter, update);
             res.send(result);
         });
