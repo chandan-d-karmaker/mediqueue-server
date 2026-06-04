@@ -80,12 +80,12 @@ async function run() {
 
             if (startDate && startDate.trim() !== "") {
                 // Tutors who starton or after this date
-                query.sessionStartDate = { ...query.sessionStartDate, $gte: startDate };
+                query.sessionStartDate = { ...query.sessionStartDate, $gte: new Date(startDate) };
             }
 
             if (endDate && endDate.trim() !== "") {
                 // Tutors who start on or before this date
-                query.sessionStartDate = { ...query.sessionStartDate, $lte: endDate };
+                query.sessionStartDate = { ...query.sessionStartDate, $lte: new Date(endDate) };
             }
             // console.log("MongoDB Query:", JSON.stringify(query));
             console.log("Full Query Object being sent to MongoDB:", JSON.stringify(query, null, 2));
@@ -180,6 +180,7 @@ async function run() {
         // for adding a tutor by user
         app.post('/all-tutors', verifyToken, async (req, res) => {
             const tutorData = req.body;
+            tutorData.sessionStartDate = new Date(tutorData.sessionStartDate);
             console.log(tutorData);
             tutorData.remainingSlots = parseInt(tutorData.remainingSlots, 10);
             const result = await tutorCollection.insertOne(tutorData);
